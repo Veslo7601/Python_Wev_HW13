@@ -25,7 +25,6 @@ async def send_email(email: EmailStr, username: str, host: str):
     """function send email"""
     try:
         token_verification = await create_email_token({"sub": email})
-        print(f"Токен стоврений ----- {token_verification}")
         message = MessageSchema(
             subject="Confirm your email",
             recipients=[email],
@@ -34,6 +33,5 @@ async def send_email(email: EmailStr, username: str, host: str):
         )
         fm = FastMail(conf)
         await fm.send_message(message,template_name="email_template.html")
-        print(f"Токен переданий ----- {token_verification}")
     except ConnectionErrors as e:
         print(f" Send_email ---- {e}")

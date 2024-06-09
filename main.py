@@ -1,10 +1,11 @@
+import uvicorn
 from os import environ
 import redis.asyncio as redis
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
-from My_project.routers import contact, auth
-import uvicorn
+from My_project.routers import contact, auth, users
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
@@ -38,8 +39,21 @@ async def startup(app: FastAPI):
 
 app = FastAPI(lifespan=startup)
 
+origins = [ 
+    "http://localhost:3000"
+    ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(contact.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 @app.get("/", dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def read_root():
