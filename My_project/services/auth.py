@@ -1,16 +1,15 @@
+from os import environ
 from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-# from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 from starlette import status
 
 from My_project.database.database import async_get_database
-from My_project.database.models import User
 from My_project.repository.users import get_user_by_email
 
 
@@ -27,8 +26,8 @@ class Hash:
         return self.context.hash(password)
 
 
-SECRET_KEY = "secret_key"
-ALGORITHM = "HS256"
+SECRET_KEY = environ.get("SECRET_KEY")
+ALGORITHM = environ.get("ALGORITHM")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -86,7 +85,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     except JWTError:
         raise exception
 
-    # user = db.query(User).filter(User.email == email).first()
     user = get_user_by_email(email, db)
     if user is None:
         raise exception

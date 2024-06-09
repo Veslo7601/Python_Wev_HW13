@@ -1,14 +1,9 @@
 from libgravatar import Gravatar
-# from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from My_project.database.models import User
 from My_project.schemas import UserModel
-
-# async def get_user_by_email(email: str, db: AsyncSession) -> User:
-#     """function get user using email"""
-#     return db.query(User).filter(User.email == email).first()
 
 async def get_user_by_email(email: str, db: AsyncSession) -> User:
     """function to get user by email"""

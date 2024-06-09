@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from os import environ
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi_mail.errors import ConnectionErrors
 from pydantic import EmailStr
@@ -8,16 +8,16 @@ from My_project.services.auth import create_email_token
 
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="veslo7601@meta.ua",
-    MAIL_PASSWORD="Q12345Rr",
-    MAIL_FROM="veslo7601@meta.ua",
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.meta.ua",
-    MAIL_FROM_NAME="Example email",
-    MAIL_STARTTLS=False,
-    MAIL_SSL_TLS=True,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True,
+    MAIL_USERNAME= environ.get("MAIL_USERNAME"),
+    MAIL_PASSWORD= environ.get("MAIL_PASSWORD"),
+    MAIL_FROM= environ.get("MAIL_FROM"),
+    MAIL_PORT= environ.get("MAIL_PORT"),
+    MAIL_SERVER= environ.get("MAIL_SERVER"),
+    MAIL_FROM_NAME= environ.get("MAIL_FROM_NAME"),
+    MAIL_STARTTLS= environ.get("MAIL_STARTTLS"),
+    MAIL_SSL_TLS= environ.get("MAIL_SSL_TLS"),
+    USE_CREDENTIALS= environ.get("USE_CREDENTIALS"),
+    VALIDATE_CERTS= environ.get("VALIDATE_CERTS"),
     TEMPLATE_FOLDER=Path(__file__).parent / 'templates',
 )
 

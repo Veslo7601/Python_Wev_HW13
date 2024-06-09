@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from My_project.routers import contact, auth
 import uvicorn
 
+from dotenv import load_dotenv
+load_dotenv()
+
 app = FastAPI()
 
 app.include_router(contact.router, prefix="/api")
