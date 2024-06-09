@@ -29,27 +29,27 @@ class EmailResponse(EmailModel):
         orm_mode = True
 
 
-class ContactModel(BaseModel):
+class ContactBase(BaseModel):
     """Base model for contact"""
     first_name: str = Field(max_length=64)
     last_name: str = Field(max_length=64)
     date_of_birthday: date
     additional_data: Optional[str] = Field(max_length=256, default=None)
+
+
+class ContactCreate(ContactBase):
+    """Model for creating contact"""
     phone_numbers: List[PhoneNumberModel]
     emails: List[EmailModel]
 
 
-class ContactUpdateModel(BaseModel):
-    """Base model for update contact"""
-    first_name: Optional[str] = Field(max_length=64)
-    last_name: Optional[str] = Field(max_length=64)
-    date_of_birthday: Optional[date]
-    additional_data: Optional[str] = Field(max_length=256, default=None)
-    phone_numbers: List[PhoneNumberModel]
-    emails: List[EmailModel]
+class ContactUpdate(ContactBase):
+    """Model for updating contact"""
+    phone_numbers: Optional[List[PhoneNumberModel]]
+    emails: Optional[List[EmailModel]]
 
 
-class ContactResponse(ContactModel):
+class ContactResponse(ContactBase):
     """Response model for contact"""
     id: int
 
@@ -63,6 +63,7 @@ class UserModel(BaseModel):
     email: str = Field(max_length=256)
     password: str = Field(min_length=8, max_length=255)
 
+
 class UserDBModel(BaseModel):
     """Base model for user in database"""
     id: int
@@ -73,6 +74,7 @@ class UserDBModel(BaseModel):
     class Config:
         orm_mode = True
 
+
 class UserResponse(BaseModel):
     """Response model for user"""
     username: str
@@ -82,6 +84,7 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class TokenModel(BaseModel):
     """Base model for token"""

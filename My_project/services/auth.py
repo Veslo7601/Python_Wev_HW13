@@ -4,12 +4,14 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 from starlette import status
 
-from My_project.database.database import get_database
+from My_project.database.database import async_get_database
 from My_project.database.models import User
+from My_project.repository.users import get_user_by_email
 
 
 class Hash:
@@ -65,7 +67,7 @@ async def get_email_from_refresh_token(refresh_token: str):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_database)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(async_get_database)):
     """Get the current user from the token"""
     exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -84,7 +86,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     except JWTError:
         raise exception
 
-    user = db.query(User).filter(User.email == email).first()
+    # user = db.query(User).filter(User.email == email).first()
+    user = get_user_by_email(email, db)
     if user is None:
         raise exception
     return user
