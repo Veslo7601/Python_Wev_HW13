@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends, status, Security, Backgro
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi_limiter.depends import RateLimiter
+
 from My_project.database.database import async_get_database
 from My_project.database.models import User
 from My_project.services.auth import (create_access_token, create_refresh_token,
@@ -16,7 +18,9 @@ router = APIRouter(prefix="/authentication")
 hash = Hash()
 security = HTTPBearer()
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
+             description="No more than 10 requests per minute",
+             dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Request, db: AsyncSession = Depends(async_get_database)):
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
@@ -36,7 +40,9 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
         "detail": "User successfully created. Check your email for confirmation."
     }
 
-@router.post("/login", response_model=TokenModel)
+@router.post("/login", response_model=TokenModel,
+             description="No more than 10 requests per minute",
+             dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(async_get_database)):
     user_exist = await repository_users.get_user_by_email(body.username, db)
     if user_exist is None:
@@ -51,7 +57,9 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     await repository_users.update_token(user_exist, refresh_token, db)
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
-@router.get('/confirmed_email/{token}')
+@router.get('/confirmed_email/{token}',
+            description="No more than 10 requests per minute",
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def confirmed_email(token: str, db: AsyncSession = Depends(async_get_database)):
     email = await get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -63,7 +71,9 @@ async def confirmed_email(token: str, db: AsyncSession = Depends(async_get_datab
     await repository_users.confirmed_email(email, db)
     return {"message": "Email confirmed"}
 
-@router.post('/request_email')
+@router.post('/request_email',
+             description="No more than 10 requests per minute",
+             dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
                         db: AsyncSession = Depends(async_get_database)):
     user = await repository_users.get_user_by_email(body.email, db)
@@ -77,7 +87,9 @@ async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, r
     return {"message": "Check your email for confirmation"}
 
 
-@router.get('/refresh_token', response_model=TokenModel)
+@router.get('/refresh_token', response_model=TokenModel,
+            description="No more than 10 requests per minute",
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: AsyncSession = Depends(async_get_database)):
     token = credentials.credentials
     email = await get_email_from_refresh_token(token)
