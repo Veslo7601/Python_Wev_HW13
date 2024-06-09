@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 
 Base = declarative_base()
 
@@ -42,3 +42,4 @@ class User(Base):
     avatar = Column(String(255), nullable=False)
     refresh_token = Column(String(255), nullable=True)
     contacts = relationship("Contact", back_populates="user", cascade="all, delete-orphan")
+    confirmed = Column(Boolean, default=False)

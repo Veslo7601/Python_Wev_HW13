@@ -1,6 +1,6 @@
 from datetime import date
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 
 class PhoneNumberModel(BaseModel):
@@ -13,6 +13,7 @@ class PhoneNumberResponse(PhoneNumberModel):
     id: int
 
     class Config:
+        """Class config"""
         orm_mode = True
 
 
@@ -26,6 +27,7 @@ class EmailResponse(EmailModel):
     id: int
 
     class Config:
+        """Class config"""
         orm_mode = True
 
 
@@ -54,6 +56,7 @@ class ContactResponse(ContactBase):
     id: int
 
     class Config:
+        """Class config"""
         orm_mode = True
 
 
@@ -72,6 +75,7 @@ class UserDBModel(BaseModel):
     avatar: str
 
     class Config:
+        """Class config"""
         orm_mode = True
 
 
@@ -83,6 +87,7 @@ class UserResponse(BaseModel):
     detail: str = "User successfully created"
 
     class Config:
+        """Class config"""
         orm_mode = True
 
 
@@ -91,3 +96,12 @@ class TokenModel(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class EmailSchema(BaseModel):
+    """Base moder for email"""
+    email: EmailStr
+
+class RequestEmail(BaseModel):
+    """Base model for email request"""
+    email: EmailStr
