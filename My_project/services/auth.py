@@ -1,15 +1,16 @@
+from os import environ
 from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 from starlette import status
 
-from My_project.database.database import get_database
-from My_project.database.models import User
+from My_project.database.database import async_get_database
+from My_project.repository.users import get_user_by_email
 
 
 class Hash:
@@ -25,8 +26,8 @@ class Hash:
         return self.context.hash(password)
 
 
-SECRET_KEY = "secret_key"
-ALGORITHM = "HS256"
+SECRET_KEY = environ.get("SECRET_KEY")
+ALGORITHM = environ.get("ALGORITHM")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -65,7 +66,7 @@ async def get_email_from_refresh_token(refresh_token: str):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_database)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(async_get_database)):
     """Get the current user from the token"""
     exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -84,7 +85,27 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     except JWTError:
         raise exception
 
-    user = db.query(User).filter(User.email == email).first()
+    user = get_user_by_email(email, db)
     if user is None:
         raise exception
     return user
+
+async def create_email_token(data: dict):
+    """function create email-token"""
+    to_encode = data.copy()
+    expire = datetime.now() + timedelta(days=7)
+    to_encode.update({"iat": datetime.now(), "exp": expire})
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
+async def get_email_from_token(token: str):
+    """function get email from token"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid token payload")
+        return email
+    except JWTError as e:
+        print(f"{e}")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid token for email verification")
