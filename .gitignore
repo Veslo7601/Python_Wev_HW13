@@ -2,4 +2,6 @@
 .gitignore
 settings.json
 /data
+/data_async
+/data_django
 .env

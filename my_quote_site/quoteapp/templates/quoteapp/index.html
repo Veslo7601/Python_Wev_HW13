@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Organizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"/>
+</head>
+<body>
+<main class="container">
+    <nav style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px">
+        {% if user.is_authenticated %}
+        <ul>
+            <li><a href="{% url 'quoteapp:tag' %}" role="button">Add Tag</a></li>
+            <li><a href="{% url 'quoteapp:quote' %}" role="button">Add Quote</a></li>
+            <li><a href="{% url 'quoteapp:author' %}" role="button">Add Author</a></li>
+        </ul>
+        <ul>
+            <li>Welcome <b>{{ user.username }}!</b></li>
+            <li><a href="{% url 'users:logout' %}" role="button">Logout</a></li>
+        </ul>
+        {% else %}
+        <ul>
+            <li><a href="{% url 'users:signup' %}" role="button">Sign Up</a></li>
+            <li><a href="{% url 'users:login' %}" role="button">Login</a></li>
+        </ul>
+        {% endif %}
+    </nav>
+    
+    <ul>
+        {% for quote in quotes %}
+            <li style="padding: 10px; border-bottom: 1px solid #ccc;">
+                <p><strong>Quote:</strong> {{ quote.quote }}</p>
+                <p><strong>Author:</strong> 
+                    <a href="{% url 'quoteapp:author_detail' quote.author.id %}">
+                        {{ quote.author.name }}
+                    </a>
+                </p>
+                <p><strong>Tags:</strong>
+                    {% for tag in quote.tags.all %}
+                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if quotes.has_previous %}
+                <li><a href="?page=1">&laquo; First</a></li>
+                <li><a href="?page={{ quotes.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">{{ quotes.number }}</span></li>
+
+            {% if quotes.has_next %}
+                <li><a href="?page={{ quotes.next_page_number }}">Next</a></li>
+                <li><a href="?page={{ quotes.paginator.num_pages }}">Last &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</main>
+</body>
+</html>
