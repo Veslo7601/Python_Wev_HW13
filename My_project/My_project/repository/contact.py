@@ -45,7 +45,7 @@ async def get_contact(contact_id: int, user: User, db: AsyncSession) -> Optional
 
     query = select(Contact).filter(and_(Contact.id == contact_id, Contact.user_id == user_id))
     result = await db.execute(query)
-    contact = result.scalars().first()
+    contact = result.scalar()
     return contact
 
 async def create_contact(body: ContactCreate, user: User, db: AsyncSession) -> Contact:
