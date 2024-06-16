@@ -18,7 +18,7 @@ async def get_user_by_email(email: str, db: AsyncSession) -> User:
     """
     query = select(User).where(User.email == email)
     result = await db.execute(query)
-    return result.scalars().first()
+    return result.scalar_one_or_none()
 
 async def create_user(body: UserModel, db: AsyncSession) -> User:
     """
