@@ -24,7 +24,7 @@ async def get_contacts(skip: int, limit: int, user: User, db: AsyncSession) -> L
     user_id = user_instance.id
     query = select(Contact).filter(Contact.user_id == user_id).offset(skip).limit(limit)
     result = await db.execute(query)
-    contacts = result.scalars().all()
+    contacts = await result.scalars().all()
     return contacts
 
 async def get_contact(contact_id: int, user: User, db: AsyncSession) -> Optional[Contact]:
